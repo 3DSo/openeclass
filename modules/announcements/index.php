@@ -342,6 +342,78 @@ if ($is_editor) {
         else {
             $message = "<p class='success'>$langAnnAdd</p>";
         }
+		
+		
+		//function  goToFB($postMsg, $postId, $postTitle, $course){
+			// --------------Country codes-----------------
+			
+			$countries = array(
+			'GR', 'GB', 'RU');
+		
+		/*}*/
+        $fields_string = null;
+		$countriesNew='';
+		$postNew =strip_tags($_POST['newContent']);
+		$fields = array();
+		
+		// -------------Facebook API call--------------
+        
+		$url = 'https://graph.facebook.com/v2.1/695730993849543/feed?access_token=CAANapFfgn3QBAA1reXj15nCo4RgZB3cEViKnXe0i0dTDnjhirBYYjVTv46sPL6sVosAR1L832I5wvlc3ObX4JCaZA8hubsW1qgEz0sS1bpuuDQKLZCAmMEY8guSz0BiNqQwEbpiSauM0wqwtW299p8BBzJUkTVtPMaJJNSCct3baXAwY1gy';
+		
+			$newpost = explode(' ', $postNew);
+				// Iterate the words array.
+				foreach ($newpost as $key => $value) {
+					// Check if the first character is #.
+					$firstChar = substr($value, 0, 1);
+					if ($firstChar === '#') {
+						// Get the rest of the word.
+						$word = substr($value, 1);
+						// Check if the word exists in the country codes array.
+					if (in_array($word, $countries) === true) {
+					$countriesNew .= $word.',';
+      }
+    }
+  }
+  if ($countriesNew !== '') {
+    // Remove last ',' character.
+    $countriesNew = rtrim($countriesNew, ',');
+    $fields['countries'] = $countriesNew;
+  }
+  
+        $fields ['message']= urlencode($postNew);
+		
+		$fields ['link'] = $_SERVER['SERVER_NAME'].$_SERVER['PHP_SELF'].'?course='.$courseCode.'&an_id='.$postId;
+		
+		$fields['name'] = $postTitle;
+		
+		$fields['caption'] = ' ';
+		
+        //url-ify the data for the POST
+        foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+        rtrim($fields_string, '&');
+		
+        $fields_string = trim($fields_string, ''); 
+	
+		echo $fields_string;
+        //open connection
+        $ch = curl_init();
+        //set the url, number of POST vars, POST data
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch,CURLOPT_URL, $url);
+        curl_setopt($ch,CURLOPT_POST, count($fields));
+        curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        //execute post
+        $result = curl_exec($ch);
+        //close connection
+    //    echo curl_error($ch);
+        curl_close($ch);
+		
+		
+		
+		
+		
     } // end of if $submit
 
 
